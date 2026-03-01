@@ -276,21 +276,21 @@ function NotesPage() {
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="x text"
+            placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
 
           <textarea
-            placeholder="x content"
+            placeholder="Content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
           />
           <input
             type="text"
-            placeholder="x tag"
+            placeholder="Tags (separated by ,)"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
@@ -378,7 +378,7 @@ function NotesPage() {
                 <div className="add-tag-container">
                   <input
                     type="text"
-                    placeholder="x tag"
+                    placeholder="Add tag"
                     value={noteTagInputs[note.id] || ""}
                     onChange={(e) =>
                       setNoteTagInputs((prev) => ({
