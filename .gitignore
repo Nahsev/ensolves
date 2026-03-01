@@ -4,3 +4,7 @@ backend/node_modules/
 node_modules/
 dist/   
 frontend/node_modules/
+
+.vscode/
+.env
+*.log
