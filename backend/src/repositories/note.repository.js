@@ -22,57 +22,61 @@ class NoteRepository {
   }
 
   async update(note, data) {
+    if (data.tags) {
+      note.tags = data.tags;
+      note.changed("tags", true);
+    }
     return await note.update(data);
   }
 
   async deleteNote(id) {
-  const note = await Note.findByPk(id);
-  if (!note) return null;
+    const note = await Note.findByPk(id);
+    if (!note) return null;
 
-  try {
-    await note.destroy();
-    return note;
-  } catch (err) {
-    console.error("DB delete error:", err);
-    throw err; 
-  }
-}
-
-async findWithFilters(filters) {
-  const where = {};
-
-  
-  if (filters.archived === "true" || filters.archived === "false") {
-    where.archived = filters.archived === "true";
+    try {
+      await note.destroy();
+      return note;
+    } catch (err) {
+      console.error("DB delete error:", err);
+      throw err;
+    }
   }
 
-  
+  async findWithFilters(filters) {
+    const where = {};
 
-if (filters.tag) {
-  const tagsArray = filters.tag.split(',').map(t => t.trim()).filter(t => t !== "");
 
-  if (tagsArray.length > 0) {
-    where.tags = {
-      
-      [Op.contains]: tagsArray 
-    };
-  }
-} 
+    if (filters.archived === "true" || filters.archived === "false") {
+      where.archived = filters.archived === "true";
+    }
 
-  return await Note.findAll({ where });
-}
-  async findByTags(tagsString) {
-  
-  const tagsArray = tagsString.split(','); 
-  
-  return await Note.findAll({
-    where: {
-      tags: {
-        [Op.overlap]: tagsArray 
- 
+
+
+    if (filters.tag) {
+      const tagsArray = filters.tag.split(',').map(t => t.trim()).filter(t => t !== "");
+
+      if (tagsArray.length > 0) {
+        where.tags = {
+
+          [Op.contains]: tagsArray
+        };
       }
     }
-  });
-}
+
+    return await Note.findAll({ where });
+  }
+  async findByTags(tagsString) {
+
+    const tagsArray = tagsString.split(',');
+
+    return await Note.findAll({
+      where: {
+        tags: {
+          [Op.overlap]: tagsArray
+
+        }
+      }
+    });
+  }
 }
 module.exports = new NoteRepository();
