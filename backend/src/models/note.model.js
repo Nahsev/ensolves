@@ -6,6 +6,7 @@ const Note = sequelize.define("Note", {
   content: { type: DataTypes.TEXT, allowNull: false },
   archived: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   tags: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: false, defaultValue: [] },
+  userId: { type: DataTypes.INTEGER, allowNull: false }
 });
 
 module.exports = Note;

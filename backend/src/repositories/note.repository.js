@@ -45,19 +45,18 @@ class NoteRepository {
   async findWithFilters(filters) {
     const where = {};
 
+    if (filters.userId) {
+      where.userId = filters.userId;
+    }
 
     if (filters.archived === "true" || filters.archived === "false") {
       where.archived = filters.archived === "true";
     }
 
-
-
     if (filters.tag) {
       const tagsArray = filters.tag.split(',').map(t => t.trim()).filter(t => t !== "");
-
       if (tagsArray.length > 0) {
         where.tags = {
-
           [Op.contains]: tagsArray
         };
       }
