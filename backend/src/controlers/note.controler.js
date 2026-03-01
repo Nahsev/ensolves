@@ -53,15 +53,18 @@ async getNotes(req, res) {
     res.status(500).json({ message: "Error updating note" });
   }
 }
-  async deleteNote(req, res) {
+ async deleteNote(req, res) {
+  try {
     const todelete = await NoteService.deleteNote(req.params.id);
     if (!todelete) {
       return res.status(404).json({ message: "Note not found" });
     }
-
     res.status(204).send();
+  } catch (err) {
+    console.error("Error deleting note:", err);
+    res.status(500).json({ message: "Error deleting note" });
   }
-
+}
  async archiveNote(req, res) {
   const note = await NoteService.archiveNote(req.params.id);
   if (!note) {
