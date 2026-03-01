@@ -4,8 +4,8 @@ class NoteController {
   
 async getNotes(req, res) {
   try {
-   
-    const notes = await NoteService.getAllNotes(req.query); 
+    const userId = req.user?.id; 
+    const notes = await NoteService.getAllNotes({ ...req.query, userId });
     res.json(notes);
   } catch (err) {
     res.status(500).json({ message: "Error al obtener las notas" });
@@ -19,10 +19,14 @@ async getNotes(req, res) {
     }
     res.json(note);
   }
-  async createNote(req, res) {
- try {
-    const { title, content, tags } = req.body;
 
+
+
+
+ async createNote(req, res) {
+  try {
+    const { title, content, tags } = req.body;
+    const userId = req.user?.id;
     if (!title || !content) {
       return res.status(400).json({ message: "Title and content are required" });
     }
@@ -30,16 +34,25 @@ async getNotes(req, res) {
     const note = await NoteService.createNote({
       title,
       content,
-      tags: tags || []  
+      tags: tags || [],
+      userId
     });
 
     res.status(201).json(note);
-
   } catch (err) {
     console.error("Error creating note:", err);
     res.status(500).json({ message: "Error creating note" });
   }
 }
+
+
+
+
+
+
+
+
+
  async updateNote(req, res) {
   try {
     const updated = await NoteService.updateNote(req.params.id, req.body);

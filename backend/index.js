@@ -1,16 +1,15 @@
-const app = require("./src/app")
-const sequelize = require("./src/config/database")
-require("dotenv").config()
-
-
+const app = require("./src/app");
+const sequelize = require("./src/config/database");
+require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
+
 (async () => {
   try {
-    await sequelize.authenticate(); // prueba la conexión
+    await sequelize.authenticate(); 
     console.log("Conectado a Neon con éxito!");
     
-    await sequelize.sync(); // sincroniza los modelos (crea tablas si no existen)
+    await sequelize.sync({ alter: true }); // sincroniza modelos, crea tablas nuevas
     console.log("Database sincronizada correctamente");
 
     app.listen(PORT, () => {

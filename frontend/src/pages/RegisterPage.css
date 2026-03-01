@@ -1,0 +1,36 @@
+.register-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  background-color: #1e1e1e;
+  color: white;
+  font-family: Arial, sans-serif;
+  width: 800px;
+
+}
+
+.register-container input {
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  width: 200px;
+  font-size: 16px;
+}
+
+.register-container button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #0078ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.register-container button:hover {
+  background-color: #005fcc;
+}

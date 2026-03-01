@@ -44,41 +44,55 @@ button:hover {
   text-align: left;
 }
 
-
-.actions{
+.actions {
   display: flex;
   flex-direction: column;
-
+  width: 170px;
 }
 
-
-.archive{
-  background-color: yellowgreen;
+.archive {
+  background-color: #FFD700;
 }
-.delete{
-  background-color: red;
+.archive:hover {
+  background-color: #D9D9A3;
 }
-
-.delete:hover{
-  background-color: brown;
+.delete {
+  background-color: #f44336;
 }
 
+.delete:hover {
+  background-color: #d32f2f;
+}
 
-.filters{
+.filters {
   display: flex;
   flex-direction: column;
   align-items: start;
 }
 
-.active-filters-container{
+.active-filters-container {
   display: flex;
   text-align: left;
 }
 
+.active-tag {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-.active-tag{
-display: flex;
-justify-content: space-between;
-align-items: center;
 
+
+
+
+
+
+.tag-container{
+  
+    display: flex;   
+    align-items: center;
+    
+button{
+  margin-left: 20px
+}
 }

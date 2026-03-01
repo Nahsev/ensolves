@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const NoteController = require("../controlers/note.controler");
+const NoteController = require("../controllers/note.controller");
 
 router.get("/", NoteController.getNotes);
 router.get("/:id", NoteController.getNoteById);

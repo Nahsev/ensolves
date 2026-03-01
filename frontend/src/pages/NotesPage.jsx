@@ -11,22 +11,31 @@ function NotesPage() {
   const [tags, setTags] = useState("");
   const [activeTags, setActiveTags] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const link = import.meta.env.VITE_API_URL;
+  const [noteTagInputs, setNoteTagInputs] = useState({});
+  const link = import.meta.env.VITE_API_URL + "/notes";
 
-const formRef = useRef(null)
+  const fetchWithAuth = async (url, options = {}) => {
+    const token = localStorage.getItem("token");
+    const headers = { ...options.headers };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetch(url, { ...options, headers });
+  };
+
+  const formRef = useRef(null);
 
   useEffect(() => {
     const fetchnotes = async () => {
       try {
-        const respons = await fetch(link);
-        if (!respons.ok) {
-          console.log("error to load the Notes");
+        const username = localStorage.getItem("username");
+        const res = await fetchWithAuth(`${link}?username=${username}`);
+        if (!res.ok) {
+          console.log("Error loading notes");
         } else {
-          const data = await respons.json();
-          setData(data);
+          const notes = await res.json();
+          setData(notes);
         }
       } catch (err) {
-        console.log(`fail to fetch: ${err}`);
+        console.log(`Fail to fetch: ${err}`);
       }
     };
 
@@ -35,7 +44,7 @@ const formRef = useRef(null)
 
   const handleArchive = async (id) => {
     try {
-      const res = await fetch(`${link}/${id}/archive`, {
+      const res = await fetchWithAuth(`${link}/${id}/archive`, {
         method: "PATCH",
       });
 
@@ -53,7 +62,7 @@ const formRef = useRef(null)
 
   const handleUnArchive = async (id) => {
     try {
-      const res = await fetch(`${link}/${id}/unarchive`, {
+      const res = await fetchWithAuth(`${link}/${id}/unarchive`, {
         method: "PATCH",
       });
 
@@ -71,7 +80,7 @@ const formRef = useRef(null)
 
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`${link}/${id}`, {
+      const res = await fetchWithAuth(`${link}/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +100,7 @@ const formRef = useRef(null)
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(link, {
+      const res = await fetchWithAuth(link, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -110,7 +119,6 @@ const formRef = useRef(null)
         setTitle("");
         setContent("");
         setTags("");
-        
       } else {
         console.log("Error creating note");
       }
@@ -119,55 +127,50 @@ const formRef = useRef(null)
     }
   };
   const handleTagSearch = async (tag) => {
-  const trimmedTag = tag.trim();
-  
-  // Evitamos tags vacíos o repetidos
-  if (!trimmedTag || activeTags.includes(trimmedTag)) {
-    setTagSearch("");
-    return;
-  }
+    const trimmedTag = tag.trim();
 
-  const newActiveTags = [...activeTags, trimmedTag];
-  setActiveTags(newActiveTags);
-
-  try {
-   
-    const params = new URLSearchParams();
-    params.append("tag", newActiveTags.join(","));
-    
-    
-    if (filter !== "all") {
-      params.append("archived", filter === "archived");
+    if (!trimmedTag || activeTags.includes(trimmedTag)) {
+      setTagSearch("");
+      return;
     }
 
-    const res = await fetch(`${link}?${params.toString()}`);
-    
-    if (res.ok) {
-      const result = await res.json();
-      setData(result);
+    const newActiveTags = [...activeTags, trimmedTag];
+    setActiveTags(newActiveTags);
+
+    try {
+      const params = new URLSearchParams();
+      params.append("tag", newActiveTags.join(","));
+
+      if (filter !== "all") {
+        params.append("archived", filter === "archived");
+      }
+
+      const res = await fetchWithAuth(`${link}?${params.toString()}`);
+
+      if (res.ok) {
+        const result = await res.json();
+        setData(result);
+      }
+    } catch (err) {
+      console.error("Error filtrando tags:", err);
+    } finally {
+      setTagSearch("");
     }
-  } catch (err) {
-    console.error("Error filtrando tags:", err);
-  } finally {
-    setTagSearch(""); 
-  }
-};
+  };
 
+  const filteredNotes = data.filter((note) => {
+    if (filter === "active" && note.archived) return false;
+    if (filter === "archived" && !note.archived) return false;
 
-const filteredNotes = data.filter((note) => {
- 
-  if (filter === "active" && note.archived) return false;
-  if (filter === "archived" && !note.archived) return false;
+    if (activeTags.length > 0) {
+      if (!note.tags || note.tags.length === 0) return false;
 
-  if (activeTags.length > 0) {
-    if (!note.tags || note.tags.length === 0) return false;
-    
-    const hasMatch = activeTags.some((tag) => note.tags.includes(tag));
-    if (!hasMatch) return false;
-  }
+      const hasMatch = activeTags.some((tag) => note.tags.includes(tag));
+      if (!hasMatch) return false;
+    }
 
-  return true;
-});
+    return true;
+  });
 
   const handleRemoveTag = async (tagToRemove) => {
     const updatedTags = activeTags.filter((tag) => tag !== tagToRemove);
@@ -175,13 +178,13 @@ const filteredNotes = data.filter((note) => {
 
     try {
       if (updatedTags.length === 0) {
-        const res = await fetch(link);
+        const res = await fetchWithAuth(link);
         if (res.ok) {
           const data = await res.json();
           setData(data);
         }
       } else {
-        const res = await fetch(`${link}?tag=${updatedTags.join(",")}`);
+        const res = await fetchWithAuth(`${link}?tag=${updatedTags.join(",")}`);
         if (res.ok) {
           const data = await res.json();
           setData(data);
@@ -192,20 +195,84 @@ const filteredNotes = data.filter((note) => {
     }
   };
   const handleEdit = (id) => {
-  const noteToEdit = data.find((note) => note.id === id);
-  if (noteToEdit) {
-    setTitle(noteToEdit.title);
-    setContent(noteToEdit.content);
-    setTags(noteToEdit.tags ? noteToEdit.tags.join(", ") : "");
-    setEditingId(id); 
-    
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-};
+    const noteToEdit = data.find((note) => note.id === id);
+    if (noteToEdit) {
+      setTitle(noteToEdit.title);
+      setContent(noteToEdit.content);
+      setTags(noteToEdit.tags ? noteToEdit.tags.join(", ") : "");
+      setEditingId(id);
+
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+  const removeTagFromNote = async (noteId, tagToRemove) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to remove the tag "${tagToRemove}" from this note?`,
+    );
+    if (!confirmDelete) return;
+
+    const note = data.find((n) => n.id === noteId);
+    if (!note) return;
+
+    const updatedTags = note.tags.filter((t) => t !== tagToRemove);
+
+    try {
+      const res = await fetchWithAuth(`${link}/${noteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: note.title,
+          content: note.content,
+          tags: updatedTags,
+        }),
+      });
+
+      if (res.ok) {
+        const updatedNote = await res.json();
+        setData((prev) => prev.map((n) => (n.id === noteId ? updatedNote : n)));
+      } else {
+        console.error("Failed to remove tag from note");
+      }
+    } catch (err) {
+      console.error("Error removing tag from note:", err);
+    }
+  };
+  const handleAddTag = async (noteId) => {
+    const note = data.find((n) => n.id === noteId);
+    if (!note) return;
+
+    const newTag = noteTagInputs[noteId]?.trim();
+    if (!newTag || note.tags.includes(newTag)) return; // evitar vacíos o duplicados
+
+    const updatedTags = [...note.tags, newTag];
+
+    try {
+      const res = await fetchWithAuth(`${link}/${noteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: note.title,
+          content: note.content,
+          tags: updatedTags,
+        }),
+      });
+
+      if (res.ok) {
+        const updatedNote = await res.json();
+        setData((prev) => prev.map((n) => (n.id === noteId ? updatedNote : n)));
+        setNoteTagInputs((prev) => ({ ...prev, [noteId]: "" })); // limpiar input
+      } else {
+        console.error("Failed to add tag");
+      }
+    } catch (err) {
+      console.error("Error adding tag:", err);
+    }
+  };
+
   return (
     <div>
       <div ref={formRef} className="container">
-        <form  onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Title"
@@ -213,7 +280,7 @@ const filteredNotes = data.filter((note) => {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-  
+
           <textarea
             placeholder="Content"
             value={content}
@@ -263,8 +330,11 @@ const filteredNotes = data.filter((note) => {
                 <span key={index} className="active-tag">
                   {tag}
                   <button
-                    onClick={() => handleRemoveTag(tag)}
-                    className="remove-tag"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveTag(tag);
+                    }}
+                    className="remove-tag-button"
                   >
                     ✕
                   </button>
@@ -281,21 +351,49 @@ const filteredNotes = data.filter((note) => {
               <h3>{note.title}</h3>
               <p>{note.content}</p>
               <p>{note.archived ? "Archived" : "Active"}</p>
-
-             {note.tags && note.tags.map((tag, index) => (
-  <div
-    key={index} 
-    className="tag" 
-    onClick={() => handleTagSearch(tag)}
-    style={{ cursor: 'pointer' }}
-  >
-    #{tag}
-  </div>
-))}
+              <div className="prub">
+                {note.tags &&
+                  note.tags.map((tag, index) => (
+                    <div className="tag-container" key={index}>
+                      <div
+                        key={index}
+                        className="tag"
+                        onClick={() => handleTagSearch(tag)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        #{tag}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeTagFromNote(note.id, tag);
+                        }}
+                        className="remove-tag-button"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                <div className="add-tag-container">
+                  <input
+                    type="text"
+                    placeholder="Add tag"
+                    value={noteTagInputs[note.id] || ""}
+                    onChange={(e) =>
+                      setNoteTagInputs((prev) => ({
+                        ...prev,
+                        [note.id]: e.target.value,
+                      }))
+                    }
+                  />
+                  <button type="button" onClick={() => handleAddTag(note.id)}>
+                    Add Tag
+                  </button>
+                </div>
+              </div>
             </div>
-
             <div className="actions">
-<button onClick={() => handleEdit(note.id)}>Editar</button>
+              <button onClick={() => handleEdit(note.id)}>Editar</button>
               <button
                 onClick={() =>
                   note.archived
@@ -305,15 +403,11 @@ const filteredNotes = data.filter((note) => {
                 className="archive"
               >
                 {note.archived ? "Desarchivar" : "Archivar"}
-
               </button>
-
-
 
               <button onClick={() => handleDelete(note.id)} className="delete">
                 Eliminar
               </button>
-              
             </div>
           </div>
         ))}
