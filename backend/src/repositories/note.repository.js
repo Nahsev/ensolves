@@ -45,8 +45,12 @@ class NoteRepository {
   async findWithFilters(filters) {
     const where = {};
 
+    // Mandatory userId filter
     if (filters.userId) {
       where.userId = filters.userId;
+    } else {
+      // If no userId, return empty result to be safe
+      where.userId = -1;
     }
 
     if (filters.archived === "true" || filters.archived === "false") {
