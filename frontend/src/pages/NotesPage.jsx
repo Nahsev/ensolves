@@ -8,7 +8,7 @@ function NotesPage() {
   const [tagSearch, setTagSearch] = useState("");
   const [tags, setTags] = useState("");
   const [activeTags, setActiveTags] = useState([]);
-  const link = "http://localhost:3000/notes";
+  const link = "https://ensolves.onrender.com/notes";
 
   useEffect(() => {
     const fetchnotes = async () => {
@@ -66,7 +66,7 @@ function NotesPage() {
 
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`${link}/${id}`, {
+      const res = await fetch(`${link}/${Number(id)}`, {
         method: "DELETE",
       });
 

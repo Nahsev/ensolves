@@ -55,13 +55,23 @@ async getNotes(req, res) {
 }
  async deleteNote(req, res) {
   try {
-    const todelete = await NoteService.deleteNote(req.params.id);
-    if (!todelete) {
+    const deletedNote = await NoteService.deleteNote(req.params.id);
+
+    if (!deletedNote) {
       return res.status(404).json({ message: "Note not found" });
     }
-    res.status(204).send();
+
+    
+    res.status(200).json({ message: "Note deleted successfully" });
+
   } catch (err) {
     console.error("Error deleting note:", err);
+
+    
+    if (err.name === "SequelizeForeignKeyConstraintError") {
+      return res.status(400).json({ message: "Cannot delete note: has related records" });
+    }
+
     res.status(500).json({ message: "Error deleting note" });
   }
 }

@@ -20,18 +20,19 @@ class NoteService {
 
     return await noteRepository.update(note, data);
   }
+async deleteNote(id) {
+  
+  const note = await noteRepository.findById(id);
+  if (!note) return null;
 
-  async deleteNote(id) {
-   try {
-    const todelete = await NoteService.deleteNote(req.params.id);
-    if (!todelete) {
-      return res.status(404).json({ message: "Note not found" });
-    }
-    res.status(204).send();
+  try {
+    
+    await noteRepository.delete(note); 
   } catch (err) {
     console.error("DB delete error:", err);
+    throw err; 
   }
-  }
+}
 
   async archiveNote(id) {
     const note = await noteRepository.findById(id);
