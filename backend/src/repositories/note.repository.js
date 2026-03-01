@@ -1,0 +1,64 @@
+const Note = require("../models/note.model");
+const { Op } = require("sequelize");
+
+class NoteRepository {
+
+  async findAll() {
+    return await Note.findAll();
+  }
+
+  async findByArchived(value) {
+    return await Note.findAll({
+      where: { archived: value }
+    });
+  }
+
+  async create(data) {
+    return await Note.create(data);
+  }
+
+  async findById(id) {
+    return await Note.findByPk(id);
+  }
+
+  async update(note, data) {
+    return await note.update(data);
+  }
+
+  async deleteNote(note) {
+    return await note.destroy();
+  }
+
+  async findWithFilters(filters) {
+    const where = {};
+
+    if (filters.archived === "true" || filters.archived === "false") {
+      where.archived = filters.archived === "true";
+    }
+
+    if (filters.tag) {
+      const cleanTag = filters.tag.trim();
+      if (cleanTag !== "") {
+        where.tags = {
+          [Op.contains]: [cleanTag],
+        };
+      }
+    }
+
+    return await Note.findAll({ where });
+  }
+  async findByTags(tagsString) {
+  
+  const tagsArray = tagsString.split(','); 
+  
+  return await Note.findAll({
+    where: {
+      tags: {
+        [Op.overlap]: tagsArray 
+ 
+      }
+    }
+  });
+}
+}
+module.exports = new NoteRepository();
