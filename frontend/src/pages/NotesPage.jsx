@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import "./NotesPage.css";
 
@@ -10,8 +10,10 @@ function NotesPage() {
   const [tagSearch, setTagSearch] = useState("");
   const [tags, setTags] = useState("");
   const [activeTags, setActiveTags] = useState([]);
-
+  const [editingId, setEditingId] = useState(null);
   const link = import.meta.env.VITE_API_URL;
+
+const formRef = useRef(null)
 
   useEffect(() => {
     const fetchnotes = async () => {
@@ -108,6 +110,7 @@ function NotesPage() {
         setTitle("");
         setContent("");
         setTags("");
+        
       } else {
         console.log("Error creating note");
       }
@@ -188,10 +191,21 @@ const filteredNotes = data.filter((note) => {
       console.log("Error actualizando filtros:", err);
     }
   };
+  const handleEdit = (id) => {
+  const noteToEdit = data.find((note) => note.id === id);
+  if (noteToEdit) {
+    setTitle(noteToEdit.title);
+    setContent(noteToEdit.content);
+    setTags(noteToEdit.tags ? noteToEdit.tags.join(", ") : "");
+    setEditingId(id); 
+    
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
   return (
     <div>
-      <div className="container">
-        <form onSubmit={handleSubmit}>
+      <div ref={formRef} className="container">
+        <form  onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Title"
@@ -212,7 +226,7 @@ const filteredNotes = data.filter((note) => {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
-          <button type="submit">Submit</button>
+          <button type="submit">{editingId ? "Update" : "Submit"}</button>
         </form>
       </div>
 
@@ -281,6 +295,7 @@ const filteredNotes = data.filter((note) => {
             </div>
 
             <div className="actions">
+<button onClick={() => handleEdit(note.id)}>Editar</button>
               <button
                 onClick={() =>
                   note.archived
@@ -290,11 +305,15 @@ const filteredNotes = data.filter((note) => {
                 className="archive"
               >
                 {note.archived ? "Desarchivar" : "Archivar"}
+
               </button>
+
+
 
               <button onClick={() => handleDelete(note.id)} className="delete">
                 Eliminar
               </button>
+              
             </div>
           </div>
         ))}
