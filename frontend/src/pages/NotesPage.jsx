@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 import "./NotesPage.css";
 
 function NotesPage() {
+  const { username: urlUsername } = useParams();
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -19,12 +22,25 @@ function NotesPage() {
     const token = localStorage.getItem("token");
     const headers = { ...options.headers };
     if (token) headers.Authorization = `Bearer ${token}`;
-    return fetch(url, { ...options, headers });
+    const res = await fetch(url, { ...options, headers });
+
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      navigate("/");
+    }
+    return res;
   };
 
   const formRef = useRef(null);
 
   useEffect(() => {
+    const loggedUser = localStorage.getItem("username");
+    if (loggedUser !== urlUsername) {
+      navigate(`/${loggedUser}`);
+      return;
+    }
+
     const fetchnotes = async () => {
       try {
         const username = localStorage.getItem("username");
@@ -41,7 +57,7 @@ function NotesPage() {
     };
 
     fetchnotes();
-  }, []);
+  }, [urlUsername, navigate, link]);
 
   const handleArchive = async (id) => {
     try {
