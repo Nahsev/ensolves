@@ -19,7 +19,8 @@ class AuthService {
     const match = await bcrypt.compare(password, user.password);
     if (!match) throw new Error("Usuario o contraseña incorrecta");
 
-    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, {
+    const secret = process.env.JWT_SECRET || "default_secret_key_ensolvers";
+    const token = jwt.sign({ id: user.id, username: user.username }, secret, {
       expiresIn: "1h",
     });
     return { user, token };
