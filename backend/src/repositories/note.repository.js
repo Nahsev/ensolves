@@ -25,9 +25,20 @@ class NoteRepository {
     return await note.update(data);
   }
 
-  async deleteNote(note) {
-    return await note.destroy();
+  async deleteNote(id) {
+  
+  const note = await Note.findByPk(id);
+
+  if (!note) return null; 
+
+  try {
+    await note.destroy(); 
+    return note; 
+  } catch (err) {
+    console.error("DB delete error:", err);
+    throw new Error("Cannot delete note due to related records");
   }
+}
 
   async findWithFilters(filters) {
     const where = {};

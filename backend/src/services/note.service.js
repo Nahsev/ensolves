@@ -29,7 +29,7 @@ class NoteService {
     }
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ message: "Error deleting note" });
+    console.error("DB delete error:", err);
   }
   }
 
