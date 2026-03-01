@@ -12,7 +12,7 @@ function NotesPage() {
   const [activeTags, setActiveTags] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [noteTagInputs, setNoteTagInputs] = useState({});
-  const API_BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "").replace(/\/notes$/, "");
+  const API_BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "").replace(/\/+notes\/*$/, "");
   const link = API_BASE_URL + "/notes";
 
   const fetchWithAuth = async (url, options = {}) => {
