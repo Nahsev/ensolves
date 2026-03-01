@@ -5,8 +5,9 @@ function authMiddleware(req, res, next) {
   if (!token) return res.status(401).json({ message: "Token requerido" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; 
+    const secret = process.env.JWT_SECRET || "default_secret_key_ensolvers";
+    const decoded = jwt.verify(token, secret);
+    req.user = decoded;
     next();
   } catch {
     res.status(401).json({ message: "Token inválido" });
