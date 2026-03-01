@@ -54,8 +54,8 @@ async getNotes(req, res) {
   }
 }
  async deleteNote(req, res) {
-  try {
-    const deletedNote = await NoteService.deleteNote(req.params.id);
+  try {const noteId = Number(req.params.id);
+const deletedNote = await NoteService.deleteNote(noteId);
 
     if (!deletedNote) {
       return res.status(404).json({ message: "Note not found" });
@@ -76,19 +76,27 @@ async getNotes(req, res) {
   }
 }
  async archiveNote(req, res) {
-  const note = await NoteService.archiveNote(req.params.id);
-  if (!note) {
-    return res.status(404).json({ message: "Note not found" });
+  try {
+    const note = await NoteService.archiveNote(req.params.id);
+    if (!note) {
+      return res.status(404).json({ message: "Nota no encontrada" });
+    }
+    res.json(note);
+  } catch (err) {
+    res.status(500).json({ message: "Error al archivar la nota" });
   }
-  res.json(note);
 }
 
 async unarchiveNote(req, res) {
-  const note = await NoteService.unarchiveNote(req.params.id);
-  if (!note) {
-    return res.status(404).json({ message: "Note not found" });
+  try {
+    const note = await NoteService.unarchiveNote(req.params.id);
+    if (!note) {
+      return res.status(404).json({ message: "Nota no encontrada" });
+    }
+    res.json(note);
+  } catch (err) {
+    res.status(500).json({ message: "Error al desarchivar la nota" });
   }
-  res.json(note);
 }
 }
 
