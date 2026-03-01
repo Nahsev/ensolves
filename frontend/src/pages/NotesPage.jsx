@@ -36,6 +36,12 @@ function NotesPage() {
 
   useEffect(() => {
     const loggedUser = localStorage.getItem("username");
+
+    if (!loggedUser) {
+      navigate("/");
+      return;
+    }
+
     if (loggedUser !== urlUsername) {
       navigate(`/${loggedUser}`);
       return;
