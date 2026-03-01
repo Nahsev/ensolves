@@ -243,7 +243,7 @@ function NotesPage() {
     if (!note) return;
 
     const newTag = noteTagInputs[noteId]?.trim();
-    if (!newTag || note.tags.includes(newTag)) return; // evitar vacíos o duplicados
+    if (!newTag || note.tags.includes(newTag)) return;
 
     const updatedTags = [...note.tags, newTag];
 
@@ -261,7 +261,7 @@ function NotesPage() {
       if (res.ok) {
         const updatedNote = await res.json();
         setData((prev) => prev.map((n) => (n.id === noteId ? updatedNote : n)));
-        setNoteTagInputs((prev) => ({ ...prev, [noteId]: "" })); // limpiar input
+        setNoteTagInputs((prev) => ({ ...prev, [noteId]: "" }));
       } else {
         console.error("Failed to add tag");
       }
@@ -290,7 +290,7 @@ function NotesPage() {
           />
           <input
             type="text"
-            placeholder="Tags (separated by ,)"
+            placeholder="Tags (comma separated)"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
@@ -378,7 +378,7 @@ function NotesPage() {
                 <div className="add-tag-container">
                   <input
                     type="text"
-                    placeholder="Add tag"
+                    placeholder="Tags (comma separated)"
                     value={noteTagInputs[note.id] || ""}
                     onChange={(e) =>
                       setNoteTagInputs((prev) => ({
