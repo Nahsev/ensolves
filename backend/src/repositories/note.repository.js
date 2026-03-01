@@ -38,24 +38,29 @@ class NoteRepository {
   }
 }
 
-  async findWithFilters(filters) {
-    const where = {};
+async findWithFilters(filters) {
+  const where = {};
 
-    if (filters.archived === "true" || filters.archived === "false") {
-      where.archived = filters.archived === "true";
-    }
-
-    if (filters.tag) {
-      const cleanTag = filters.tag.trim();
-      if (cleanTag !== "") {
-        where.tags = {
-          [Op.contains]: [cleanTag],
-        };
-      }
-    }
-
-    return await Note.findAll({ where });
+  
+  if (filters.archived === "true" || filters.archived === "false") {
+    where.archived = filters.archived === "true";
   }
+
+  
+
+if (filters.tag) {
+  const tagsArray = filters.tag.split(',').map(t => t.trim()).filter(t => t !== "");
+
+  if (tagsArray.length > 0) {
+    where.tags = {
+      
+      [Op.contains]: tagsArray 
+    };
+  }
+}
+
+  return await Note.findAll({ where });
+}
   async findByTags(tagsString) {
   
   const tagsArray = tagsString.split(','); 

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+
 import "./NotesPage.css";
+
 function NotesPage() {
   const [data, setData] = useState([]);
   const [title, setTitle] = useState("");
@@ -8,7 +10,8 @@ function NotesPage() {
   const [tagSearch, setTagSearch] = useState("");
   const [tags, setTags] = useState("");
   const [activeTags, setActiveTags] = useState([]);
-  const link = "https://ensolves.onrender.com/notes";
+
+  const link = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchnotes = async () => {
@@ -65,26 +68,24 @@ function NotesPage() {
   };
 
   const handleDelete = async (id) => {
-  try {
-    const res = await fetch(`${link}/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    try {
+      const res = await fetch(`${link}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    if (res.ok) {
-      
-      setData((prev) => prev.filter((note) => note.id !== id));
-      console.log(`Nota ${id} eliminada correctamente`);
-    } else {
-      const errorData = await res.json();
-      console.log("Error deleting note:", errorData.message);
+      if (res.ok) {
+        setData((prev) => prev.filter((note) => note.id !== id));
+      } else {
+        const errorData = await res.json();
+        console.log("Error deleting note:", errorData.message);
+      }
+    } catch (err) {
+      console.log("Fetch error:", err);
     }
-  } catch (err) {
-    console.log("Fetch error:", err);
-  }
-};
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -115,68 +116,78 @@ function NotesPage() {
     }
   };
   const handleTagSearch = async (tag) => {
-    const trimmedTag = tag.trim();
-    if (!trimmedTag || activeTags.includes(trimmedTag)) return;
-
-    const newActiveTags = [...activeTags, trimmedTag];
-    setActiveTags(newActiveTags);
-
-    try {
-      
-      const res = await fetch(`${link}?tag=${newActiveTags.join(",")}`);
-      if (res.ok) {
-        const data = await res.json();
-        setData(data);
-      }
-    } catch (err) {
-      console.log("Error filtrando tags:", err);
-    }
-    setTagSearch(""); 
-  };
-
-  const filteredNotes = data.filter((note) => {
+  const trimmedTag = tag.trim();
   
+  // Evitamos tags vacíos o repetidos
+  if (!trimmedTag || activeTags.includes(trimmedTag)) {
+    setTagSearch("");
+    return;
+  }
+
+  const newActiveTags = [...activeTags, trimmedTag];
+  setActiveTags(newActiveTags);
+
+  try {
+   
+    const params = new URLSearchParams();
+    params.append("tag", newActiveTags.join(","));
+    
+    
+    if (filter !== "all") {
+      params.append("archived", filter === "archived");
+    }
+
+    const res = await fetch(`${link}?${params.toString()}`);
+    
+    if (res.ok) {
+      const result = await res.json();
+      setData(result);
+    }
+  } catch (err) {
+    console.error("Error filtrando tags:", err);
+  } finally {
+    setTagSearch(""); 
+  }
+};
+
+
+const filteredNotes = data.filter((note) => {
+ 
   if (filter === "active" && note.archived) return false;
   if (filter === "archived" && !note.archived) return false;
 
-  
   if (activeTags.length > 0) {
     if (!note.tags || note.tags.length === 0) return false;
-
     
-    const hasAllTags = activeTags.every((tag) =>
-      note.tags.includes(tag)
-    );
-
-    if (!hasAllTags) return false;
+    const hasMatch = activeTags.some((tag) => note.tags.includes(tag));
+    if (!hasMatch) return false;
   }
 
   return true;
 });
-  const handleRemoveTag = async (tagToRemove) => {
-  const updatedTags = activeTags.filter((tag) => tag !== tagToRemove);
-  setActiveTags(updatedTags);
 
-  try {
-    if (updatedTags.length === 0) {
-      
-      const res = await fetch(link);
-      if (res.ok) {
-        const data = await res.json();
-        setData(data);
+  const handleRemoveTag = async (tagToRemove) => {
+    const updatedTags = activeTags.filter((tag) => tag !== tagToRemove);
+    setActiveTags(updatedTags);
+
+    try {
+      if (updatedTags.length === 0) {
+        const res = await fetch(link);
+        if (res.ok) {
+          const data = await res.json();
+          setData(data);
+        }
+      } else {
+        const res = await fetch(`${link}?tag=${updatedTags.join(",")}`);
+        if (res.ok) {
+          const data = await res.json();
+          setData(data);
+        }
       }
-    } else {
-      
-      const res = await fetch(`${link}?tag=${updatedTags.join(",")}`);
-      if (res.ok) {
-        const data = await res.json();
-        setData(data);
-      }
+    } catch (err) {
+      console.log("Error actualizando filtros:", err);
     }
-  } catch (err) {
-    console.log("Error actualizando filtros:", err);
-  }
-};
+  };
   return (
     <div>
       <div className="container">
@@ -230,16 +241,13 @@ function NotesPage() {
         </div>
       </div>
       <div>
-        <div
-          className="active-filters-container"
-          
-        >
+        <div className="active-filters-container">
           {activeTags.length > 0 && (
             <div className="active-tags">
               <strong>Filtros activos:</strong>
               {activeTags.map((tag, index) => (
                 <span key={index} className="active-tag">
-                  #{tag}
+                  {tag}
                   <button
                     onClick={() => handleRemoveTag(tag)}
                     className="remove-tag"
@@ -260,15 +268,16 @@ function NotesPage() {
               <p>{note.content}</p>
               <p>{note.archived ? "Archived" : "Active"}</p>
 
-              {note.tags && note.tags.length > 0 && (
-                <div className="tags-container">
-                  {note.tags.map((tag, index) => (
-                    <span key={index} className="tag">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+             {note.tags && note.tags.map((tag, index) => (
+  <div
+    key={index} 
+    className="tag" 
+    onClick={() => handleTagSearch(tag)}
+    style={{ cursor: 'pointer' }}
+  >
+    #{tag}
+  </div>
+))}
             </div>
 
             <div className="actions">
