@@ -49,8 +49,7 @@ function NotesPage() {
 
     const fetchnotes = async () => {
       try {
-        const username = localStorage.getItem("username");
-        const res = await fetchWithAuth(`${link}?username=${username}`);
+        const res = await fetchWithAuth(link);
         if (!res.ok) {
           console.log("Error loading notes");
         } else {
@@ -122,31 +121,50 @@ function NotesPage() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await fetchWithAuth(link, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          content,
-          tags: tags
-            .split(",")
-            .map((tag) => tag.trim())
-            .filter((tag) => tag !== ""),
-        }),
-      });
+    const parsedTags = tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag !== "");
 
-      if (res.ok) {
-        const newNote = await res.json();
-        setData((prev) => [...prev, newNote]);
-        setTitle("");
-        setContent("");
-        setTags("");
+    try {
+      if (editingId) {
+        // UPDATE existing note
+        const res = await fetchWithAuth(`${link}/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, content, tags: parsedTags }),
+        });
+
+        if (res.ok) {
+          const updatedNote = await res.json();
+          setData((prev) => prev.map((n) => (n.id === editingId ? updatedNote : n)));
+          setEditingId(null);
+          setTitle("");
+          setContent("");
+          setTags("");
+        } else {
+          console.log("Error updating note");
+        }
       } else {
-        console.log("Error creating note");
+        // CREATE new note
+        const res = await fetchWithAuth(link, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, content, tags: parsedTags }),
+        });
+
+        if (res.ok) {
+          const newNote = await res.json();
+          setData((prev) => [...prev, newNote]);
+          setTitle("");
+          setContent("");
+          setTags("");
+        } else {
+          console.log("Error creating note");
+        }
       }
     } catch (err) {
-      console.log(`fail to create note: ${err}`);
+      console.log(`fail to submit note: ${err}`);
     }
   };
   const handleTagSearch = async (tag) => {
@@ -200,21 +218,15 @@ function NotesPage() {
     setActiveTags(updatedTags);
 
     try {
-      if (updatedTags.length === 0) {
-        const res = await fetchWithAuth(link);
-        if (res.ok) {
-          const data = await res.json();
-          setData(data);
-        }
-      } else {
-        const res = await fetchWithAuth(`${link}?tag=${updatedTags.join(",")}`);
-        if (res.ok) {
-          const data = await res.json();
-          setData(data);
-        }
+      const params = new URLSearchParams();
+      if (updatedTags.length > 0) params.append("tag", updatedTags.join(","));
+      const res = await fetchWithAuth(`${link}?${params.toString()}`);
+      if (res.ok) {
+        const notes = await res.json();
+        setData(notes);
       }
     } catch (err) {
-      console.log("Error actualizando filtros:", err);
+      console.log("Error updating filters:", err);
     }
   };
   const handleEdit = (id) => {
