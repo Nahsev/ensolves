@@ -67,23 +67,30 @@ export default function RegisterPage() {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
   return (
     <div className="register-container">
-
-      <input
-        type="text"
-        placeholder="Tu nombre de usuario"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleRegister}>Registrarse</button>
-      <button onClick={handleLogin}>Iniciar sesión</button>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Tu nombre de usuario"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <div className="button-group">
+          <button type="button" onClick={handleRegister}>Registrarse</button>
+          <button type="button" onClick={handleLogin}>Iniciar sesión</button>
+        </div>
+      </form>
     </div>
   );
 }
