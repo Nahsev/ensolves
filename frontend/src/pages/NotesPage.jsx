@@ -65,21 +65,26 @@ function NotesPage() {
   };
 
   const handleDelete = async (id) => {
-    try {
-      const res = await fetch(`${link}/${Number(id)}`, {
-        method: "DELETE",
-      });
+  try {
+    const res = await fetch(`${link}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (res.ok) {
-        setData((prev) => prev.filter((note) => note.id !== id));
-      } else {
-        console.log("Error deleting note");
-      }
-    } catch (err) {
-      console.log(err);
+    if (res.ok) {
+      
+      setData((prev) => prev.filter((note) => note.id !== id));
+      console.log(`Nota ${id} eliminada correctamente`);
+    } else {
+      const errorData = await res.json();
+      console.log("Error deleting note:", errorData.message);
     }
-  };
-
+  } catch (err) {
+    console.log("Fetch error:", err);
+  }
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -117,7 +122,7 @@ function NotesPage() {
     setActiveTags(newActiveTags);
 
     try {
-      // Enviamos los tags unidos por coma para que el backend los procese
+      
       const res = await fetch(`${link}?tag=${newActiveTags.join(",")}`);
       if (res.ok) {
         const data = await res.json();
@@ -126,19 +131,19 @@ function NotesPage() {
     } catch (err) {
       console.log("Error filtrando tags:", err);
     }
-    setTagSearch(""); // Limpiamos el input después de buscar
+    setTagSearch(""); 
   };
 
   const filteredNotes = data.filter((note) => {
-  // filtro por estado (active / archived)
+  
   if (filter === "active" && note.archived) return false;
   if (filter === "archived" && !note.archived) return false;
 
-  // filtro por tags activos
+  
   if (activeTags.length > 0) {
     if (!note.tags || note.tags.length === 0) return false;
 
-    // la nota debe incluir TODOS los tags activos
+    
     const hasAllTags = activeTags.every((tag) =>
       note.tags.includes(tag)
     );
@@ -154,14 +159,14 @@ function NotesPage() {
 
   try {
     if (updatedTags.length === 0) {
-      // Si no quedan filtros, traemos todas las notas
+      
       const res = await fetch(link);
       if (res.ok) {
         const data = await res.json();
         setData(data);
       }
     } else {
-      // Si quedan filtros, volvemos a consultar con los tags restantes
+      
       const res = await fetch(`${link}?tag=${updatedTags.join(",")}`);
       if (res.ok) {
         const data = await res.json();

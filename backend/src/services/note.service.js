@@ -27,7 +27,7 @@ async deleteNote(id) {
 
   try {
     
-    await noteRepository.delete(note); 
+    await noteRepository.deleteNote(id); 
   } catch (err) {
     console.error("DB delete error:", err);
     throw err; 
