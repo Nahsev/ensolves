@@ -59,6 +59,15 @@ root/
 │   └─ ...
 │
 └─ start.sh           # Bash script to set up DB and run the app
+
+
+
+🔗 Live Version
+
+Live deployed version: https://ensolves.vercel.app/
+
+
+
 🚀 Installation
 
 Clone the repository:
