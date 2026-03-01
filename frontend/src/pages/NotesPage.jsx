@@ -213,7 +213,7 @@ const filteredNotes = data.filter((note) => {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-
+  
           <textarea
             placeholder="Content"
             value={content}

@@ -57,7 +57,7 @@ if (filters.tag) {
       [Op.contains]: tagsArray 
     };
   }
-}
+} 
 
   return await Note.findAll({ where });
 }
