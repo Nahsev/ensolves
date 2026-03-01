@@ -276,40 +276,40 @@ function NotesPage() {
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="Title"
+            placeholder="x text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
 
           <textarea
-            placeholder="Content"
+            placeholder="x content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
           />
           <input
             type="text"
-            placeholder="Tags (comma separated)"
+            placeholder="x tag"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
-          <button type="submit">{editingId ? "Update" : "Submit"}</button>
+          <button type="submit">{editingId ? "Update" : "Create Note"}</button>
         </form>
       </div>
 
       <div className="filters">
         <div>
           <button type="button" onClick={() => setFilter("all")}>
-            Mostrar todas
+            Show all
           </button>
 
           <button type="button" onClick={() => setFilter("active")}>
-            Solo activas
+            Only active
           </button>
 
           <button type="button" onClick={() => setFilter("archived")}>
-            Solo archivadas
+            Only archived
           </button>
         </div>
         <div>
@@ -326,7 +326,7 @@ function NotesPage() {
         <div className="active-filters-container">
           {activeTags.length > 0 && (
             <div className="active-tags">
-              <strong>Filtros activos:</strong>
+              <strong>Active filters:</strong>
               {activeTags.map((tag, index) => (
                 <span key={index} className="active-tag">
                   {tag}
@@ -378,7 +378,7 @@ function NotesPage() {
                 <div className="add-tag-container">
                   <input
                     type="text"
-                    placeholder="Add tag"
+                    placeholder="x tag"
                     value={noteTagInputs[note.id] || ""}
                     onChange={(e) =>
                       setNoteTagInputs((prev) => ({
@@ -394,7 +394,7 @@ function NotesPage() {
               </div>
             </div>
             <div className="actions">
-              <button onClick={() => handleEdit(note.id)}>Editar</button>
+              <button onClick={() => handleEdit(note.id)}>Edit</button>
               <button
                 onClick={() =>
                   note.archived
@@ -403,11 +403,11 @@ function NotesPage() {
                 }
                 className="archive"
               >
-                {note.archived ? "Desarchivar" : "Archivar"}
+                {note.archived ? "Unarchive" : "Archive"}
               </button>
 
               <button onClick={() => handleDelete(note.id)} className="delete">
-                Eliminar
+                Delete
               </button>
             </div>
           </div>

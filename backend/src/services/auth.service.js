@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 class AuthService {
   async register(username, password) {
     const existing = await User.findOne({ where: { username } });
-    if (existing) throw new Error("Usuario ya existe");
+    if (existing) throw new Error("User already exists");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ username, password: hashedPassword });
@@ -14,10 +14,10 @@ class AuthService {
 
   async login(username, password) {
     const user = await User.findOne({ where: { username } });
-    if (!user) throw new Error("Usuario o contraseña incorrecta");
+    if (!user) throw new Error("Incorrect username or password");
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) throw new Error("Usuario o contraseña incorrecta");
+    if (!match) throw new Error("Incorrect username or password");
 
     const secret = process.env.JWT_SECRET || "default_secret_key_ensolvers";
     const token = jwt.sign({ id: user.id, username: user.username }, secret, {

@@ -32,11 +32,11 @@ export default function RegisterPage() {
         return;
       }
 
-      alert("Usuario registrado correctamente");
+      alert("User registered successfully");
       await handleLogin();
     } catch (err) {
       console.log(err);
-      alert("Error al conectar con el servidor");
+      alert("Error connecting to server");
     }
   };
 
@@ -63,7 +63,7 @@ export default function RegisterPage() {
       navigate(`/${username}`);
     } catch (err) {
       console.log(err);
-      alert("Error al conectar con el servidor");
+      alert("Error connecting to server");
     }
   };
 
@@ -76,20 +76,19 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Tu nombre de usuario"
+          placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Contraseña"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <div className="button-group">
-          <button type="button" onClick={handleRegister}>Registrarse</button>
-          <button type="button" onClick={handleLogin}>Iniciar sesión</button>
-        </div>
+        <button type="button" onClick={handleRegister}>Register</button>
+        <button type="button" onClick={handleLogin}>Login</button>
+
       </form>
     </div>
   );
